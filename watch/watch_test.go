@@ -34,6 +34,7 @@ func Test_NoAction(t *testing.T) {
 	<- wait
 	is( filename, temp_dir + string(os.PathSeparator) + "foo",
 		"Filename match")
+	os.Remove( temp_dir )
 }
 
 func make_is(t *testing.T) func(interface{}, interface{}, string) {

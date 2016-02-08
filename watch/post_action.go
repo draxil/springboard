@@ -16,8 +16,8 @@ func (a *PostAction) Process( w *Watcher, file string) {
 	reader, err := os.Open(file)
 	
 	if err != nil{
-		w.debug("error opeing file ", file, " ", err)
-		return
+	 	w.debug("error opeing file ", file, " ", err)
+	 	return
 	}
 	
 	if mime_type == "" {
@@ -27,8 +27,11 @@ func (a *PostAction) Process( w *Watcher, file string) {
 
 	rsp, err := http.Post( a.To, mime_type, reader)
 
-	w.debug("Got response ", rsp.Status)
 	if err != nil {
-		w.debug("Posting ", file, " to ", a.To, " failed ", err )
+	 	w.debug("Posting ", file, " to ", a.To, " failed ", err )
+		return
 	}
+	
+	w.debug("Got response ", rsp.Status)
+
 }
