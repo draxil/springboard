@@ -34,12 +34,15 @@ func (a *PostAction) Process(w *Watcher, file string) {
 		return
 	}
 
+	req.Header.Set("Content-Type", mime_type)
+	req.Header.Set("Content-Length", "500")
+
+
 	if len(a.BasicAuthUsername) > 0 {
 		req.SetBasicAuth(a.BasicAuthUsername, a.BasicAuthPwd)
 	}
 	
-	client := &http.Client{}
-	rsp, err := client.Do(req)
+	rsp, err := http.DefaultClient.Do(req)
 
 	if err != nil {
 		w.debug("Posting ", file, " to ", a.To, " failed ", err)

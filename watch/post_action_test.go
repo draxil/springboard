@@ -67,7 +67,7 @@ func Test_PostOK(t *testing.T){
 	}
 	log.Println(temp_file.Name())
 	defer func(){ os.Remove( temp_file.Name() )}()
-	temp_file.Write( []byte("kruncha"))
+	temp_file.Write( []byte("kruncha6"))
 	temp_file.Close()
 	os.Rename( temp_file.Name(), temp_dir + string(os.PathSeparator) + "foo")
 
@@ -75,7 +75,7 @@ func Test_PostOK(t *testing.T){
 
 	is( stuff_happened, true, "Post recieved")
 	is( read_ok, true, "Able to read body")
-	is( body, "kruncha", "Body checks out")
+	is( body, "kruncha6", "Body checks out")
 }
 
 func Test_PostFail(t *testing.T){
@@ -95,7 +95,7 @@ func Test_PostFail(t *testing.T){
 	cfg := Config{
 		dont_block: true,
 		Dir:        temp_dir,
-		Debug : true,
+		Debug : false,
 		Actions: []Action{
 			&PostAction{
 				To : "http://" + mine,
@@ -157,7 +157,7 @@ func TestBasicAuth(t *testing.T){
 	cfg := Config{
 		dont_block: true,
 		Dir:        temp_dir,
-		Debug : false,
+		Debug : true,
 		Actions: []Action{
 			&PostAction{
 				To : "http://" + mine,
