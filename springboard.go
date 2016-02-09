@@ -57,21 +57,33 @@ func run_watch(c * watch.Config) {
 
 func http_post_command(cfg *watch.Config, action func(*watch.Config)) cli.Command {
 	var pa watch.PostAction
-	var http_headers cli.StringSlice
+//	var http_headers cli.StringSlice
 	return cli.Command{
 		Name:  "post",
 		Usage: "post the file somewhere",
 		Flags: []cli.Flag{
-			cli.StringSliceFlag{
-				Name:  "header",
-				Value: &http_headers,
-				Usage: "set extra http headers, format is KEY:VAL",
-			},
+			// cli.StringSliceFlag{
+			// 	Name:  "header",
+			// 	Value: &http_headers,
+			// 	Usage: "Set extra http headers, format is KEY:VAL",
+			// },
 			cli.StringFlag{
 				Name: "mime",
-				Value: pa.Mime,
+				Destination: &pa.Mime,
 				Usage: "Force the mime type on the post",
 			},
+			cli.StringFlag{
+				Name: "uname",
+				Destination: &pa.BasicAuthUsername,
+				Usage: "Triggers use of HTTP basic auth (See RFC 2617, Section 2.) with the provided username",
+			},
+			cli.StringFlag{
+				Name: "pass",
+				Destination: &pa.BasicAuthPwd,
+				Usage: "Set the password for HTTP basic auth.",
+			},
+
+
 		},
 		ArgsUsage: "URL DIR",
 		Action: func(c *cli.Context) {

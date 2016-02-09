@@ -61,7 +61,6 @@ func (w *Watcher) run() error {
 	werr = w.fswatch.Add(w.config.Dir)
 
 	if werr == nil && !w.config.dont_block {
-		log.Println("waiting")
 		<-done
 		defer w.Close()
 	}
