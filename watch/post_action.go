@@ -3,7 +3,6 @@ package watch
 import (
 	"net/http"
 	"os"
-	"log"
 )
 
 type PostAction struct {
@@ -35,10 +34,7 @@ func (a *PostAction) Process(w *Watcher, file string) {
 		return
 	}
 
-	log.Println("pre-p")
-
 	if len(a.BasicAuthUsername) > 0 {
-		log.Println("prep")
 		req.SetBasicAuth(a.BasicAuthUsername, a.BasicAuthPwd)
 	}
 	
