@@ -15,16 +15,12 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "springboard"
 	app.Usage = "Watch a directory for files and send them places"
-	commands, flags, cfg := setup()
+	commands, flags, _ := setup()
 	app.Commands = commands
 	app.Version = version
 	app.Authors = []cli.Author{cli.Author{Name: author,
 		Email: author_email}}
 	app.Flags = flags
-	app.Action = func(c *cli.Context) {
-		fmt.Fprintln( os.Stderr, cfg.Debug)
-		cli.ShowAppHelp(c)
-	}
 	app.Run(os.Args)
 }
 
