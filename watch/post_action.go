@@ -3,6 +3,7 @@ package watch
 import (
 	"net/http"
 	"os"
+	"time"
 )
 
 type PostAction struct {
@@ -41,8 +42,11 @@ func (a *PostAction) Process(w *Watcher, file string) {
 	if len(a.BasicAuthUsername) > 0 {
 		req.SetBasicAuth(a.BasicAuthUsername, a.BasicAuthPwd)
 	}
-	
-	rsp, err := http.DefaultClient.Do(req)
+
+	var cli = &http.Client{
+		Timeout: time.Second * 120,
+	}
+	rsp, err := cli.Do(req)
 
 	if err != nil {
 		w.debug("Posting ", file, " to ", a.To, " failed ", err)
