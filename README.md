@@ -1,5 +1,5 @@
 # springboard
-Watch a directory for new files and bounce them on somewhere else
+Watch a directory for new files and bounce them on somewhere else:
 
 OR Simple "drop folder to POST request (or whatever)".
 
