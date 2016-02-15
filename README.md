@@ -4,6 +4,12 @@ OR Simple "drop folder to POST reqest (or whatever)" type thing!
 
 # usage
 
+Example:
+
+> springboard post --mime text/xml --uname homer --pass s1mps0n https://my.server.com/service ./incoming
+
+Which basically says, when new files appear in the "./incoming" directory send them as an http POST request to the url provided, using basic auth to let us in and force the mimetype to expect XML files.
+
 For the full range of options always best to do:
 
 > springboard -h
@@ -11,6 +17,7 @@ For the full range of options always best to do:
 And similarly for the options pertaining to the subcommands and actions:
  
 > springboard post -h
+
  
 # actions
  
@@ -19,7 +26,11 @@ And similarly for the options pertaining to the subcommands and actions:
  * post - Send the file content as an HTTP POST request
  * echo - Echo the file path to stdout (good for building shell pipelines)
  
- # status / plans
+# Watcher API
+
+The code effective funtionality could be useful to a go coder independent of the command itself. I'll post a godoc link here once the documentation is in any kind of shape. If you particularly want this please shout at me.
+
+# status / plans
  
  This is at an early stage of development and is subject to change! Upcoming additions:
  
