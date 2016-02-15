@@ -35,7 +35,6 @@ The code effective funtionality could be useful to a go coder independent of the
  
  This is at an early stage of development and is subject to change! Upcoming additions:
  
-* Archiving behaviour
 * Error handling behaviour
 * Picking up files that appeared while springboard was "off" 
 * Filtering / regex for being selective
