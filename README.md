@@ -19,7 +19,15 @@ And similarly for the options pertaining to the subcommands and actions:
  
 > springboard post -h
 
- 
+# installing
+
+1. Get go (version 1.4+)
+2. Make sure you have set $GOPATH to a sensible place you can write to. 
+3. Issue:
+> go get -u github.com/draxil/springboard
+
+You will want to make sure that your $GOPATH/bin is in your $PATH or else put $GOPATH/bin/springboard somewhere in your $PATH.
+
 # actions
  
  So far there are two actions:
