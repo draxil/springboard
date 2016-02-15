@@ -12,6 +12,11 @@ const author = "Joe Higton"
 const author_email = "draxil@gmail.com"
 
 func main() {
+	app := app()
+	app.Run(os.Args)
+}
+
+func app() (*cli.App){
 	app := cli.NewApp()
 	app.Name = "springboard"
 	app.Usage = "Watch a directory for files and send them places"
@@ -21,7 +26,7 @@ func main() {
 	app.Authors = []cli.Author{cli.Author{Name: author,
 		Email: author_email}}
 	app.Flags = flags
-	app.Run(os.Args)
+	return app
 }
 
 func setup() (c []cli.Command, f []cli.Flag, cfg * watch.Config) {
@@ -34,11 +39,22 @@ func setup() (c []cli.Command, f []cli.Flag, cfg * watch.Config) {
 
 
 func global_flags( cfg * watch.Config )( f []cli.Flag){
+
 	f = []cli.Flag{
 		cli.BoolFlag{
 			Name : "debug",
 			Usage : "enable verbose messaging",
 			Destination : &cfg.Debug,
+		},
+		cli.StringFlag{
+			Name : "archive",
+			Usage : "move the file to this location after successful action",
+			Destination : &cfg.ArchiveDir,
+		},
+		cli.StringSliceFlag{
+			Name : "testing",
+			Usage : "Used to set testing options, usually only required for development & testing",
+			Value : (*cli.StringSlice)(&cfg.TestingOptions),
 		},
 	}
 	return
