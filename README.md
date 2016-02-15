@@ -26,7 +26,7 @@ And similarly for the options pertaining to the subcommands and actions:
 3. Issue:
 > go get -u github.com/draxil/springboard
 
-You will want to make sure that your $GOPATH/bin is in your $PATH or else put $GOPATH/bin/springboard somewhere in your $PATH.
+You will want to make sure that your $GOPATH/bin is in your $PATH or else move the executable from $GOPATH/bin/springboard somewhere in your $PATH.
 
 # actions
  
