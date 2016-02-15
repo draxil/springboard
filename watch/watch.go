@@ -1,6 +1,7 @@
 package watch
 
 import (
+	"fmt"
 	"github.com/prometheus/prometheus/util/flock"
 	"gopkg.in/fsnotify.v1"
 	"log"
@@ -19,13 +20,14 @@ type Action interface {
   A watcher config: a directory to watch,  it's associated actions and any global options
 */
 type Config struct {
-	Actions         []Action              /* List of actions to perform when new files arrive */
-	AfterFileAction func(filename string) /* Callback to call after a file action */
-	ArchiveDir      string                /* If set, place to store files after they have been successfully processed */
-	Dir             string                /* Directory to watch */
-	Debug           bool                  /* Verbose output */
-	TestingOptions  []string              /* Misc behaviour flags largely for testing */
-	dont_block      bool
+	Actions              []Action              /* List of actions to perform when new files arrive */
+	AfterFileAction      func(filename string) /* Callback to call after a file action */
+	ArchiveDir           string                /* If set, place to store files after they have been successfully processed */
+	Dir                  string                /* Directory to watch */
+	ProcessExistingFiles bool                  /* Process pre-existing files on startup */
+	Debug                bool                  /* Verbose output */
+	TestingOptions       []string              /* Misc behaviour flags largely for testing */
+	dont_block           bool
 }
 
 /*
@@ -77,6 +79,12 @@ func (w *Watcher) run() error {
 
 	done := make(chan bool)
 
+	/* before we start watching dispatch goroutines to process any pre-existing files:
+	 */
+	if w.Config.ProcessExistingFiles {
+		w.process_existing()
+	}
+
 	/* Setup goroutine which just waits for events and errors from the filesystem watcher:
 	 */
 	var werr error
@@ -108,38 +116,63 @@ func (w *Watcher) run() error {
 	return werr
 }
 
+func (w *Watcher) process_existing() {
+	w.debug("Processing existing files")
+	f, err := os.Open(w.Config.Dir)
+	if err != nil {
+		panic(fmt.Sprintf("Error opening directory: %s", err))
+	}
+
+	fi, err := f.Readdirnames(0)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, v := range fi {
+		w.debug( "processing existing file: " + v )
+		
+		/* Unlike the usual entrypoint these are "just filenames" so glue on the path first */
+		path := w.Config.Dir + string(os.PathSeparator) + v
+		go w.handleFile(path)
+	}
+}
+
 func (w *Watcher) handle_event(e *fsnotify.Event) {
 	/* We have had a signal from the fswatcher. Most things we don't care about, but Create events we are excited by: */
 	if e.Op == fsnotify.Create {
 		w.debug("Create event for ", e.Name)
-		release, existed, err := flock.New(e.Name)
+		w.handleFile(e.Name)
+	}
+}
 
-		if !existed {
-			w.debug("File didn't exist flock will have created it. I am too chicken to delete things though.. ")
-		}
-		if err != nil {
-			w.debug("Lock failed")
-		} else {
-			defer release.Release()
-		}
+func (w *Watcher) handleFile(path string) {
+	release, existed, err := flock.New(path)
 
-		w.actions_for_file(e.Name)
+	if !existed {
+		w.debug("File didn't exist flock will have created it. I am too chicken to delete things though.. ")
+	}
+	if err != nil {
+		w.debug("Lock failed")
+	} else {
+		defer release.Release()
+	}
 
-		_, filename := filepath.Split(e.Name)
+	w.actions_for_file(path)
 
-		if w.Config.ArchiveDir != "" {
-			e := os.Rename(e.Name, w.Config.ArchiveDir+string(os.PathSeparator)+filename)
-			if e != nil {
-				w.debug(e)
-			}
-		}
+	_, filename := filepath.Split(path)
 
-		if w.Config.AfterFileAction != nil {
-			w.Config.AfterFileAction(e.Name)
+	if w.Config.ArchiveDir != "" {
+		e := os.Rename(path, w.Config.ArchiveDir+string(os.PathSeparator)+filename)
+		if e != nil {
+			w.debug(e)
 		}
-		if v := w.test_opts["exit_after_one"]; v {
-			w.Close()
-		}
+	}
+
+	if w.Config.AfterFileAction != nil {
+		w.Config.AfterFileAction(path)
+	}
+	if v := w.test_opts["exit_after_one"]; v {
+		w.Close()
 	}
 }
 

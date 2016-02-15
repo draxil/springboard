@@ -54,13 +54,25 @@ func Test_http_post_command_opts(t *testing.T) {
 }
 
 func Test_glob_opts(t *testing.T) {
-	app := cli.NewApp()
-	var our_wc watch.Config
-	app.Flags = global_flags( &our_wc )
-	is := make_is(t)
-	app.Run([]string{"", "--archive=FISHBOWL", "--debug"})
-	is(our_wc.ArchiveDir, "FISHBOWL", "archive dir")
-	is(our_wc.Debug, true, "debug on")
+	{
+		app := cli.NewApp()
+		var our_wc watch.Config
+		app.Flags = global_flags( &our_wc )
+		is := make_is(t)
+		app.Run([]string{""})
+		is(our_wc.Debug, false, "debug off")
+		is(our_wc.ProcessExistingFiles, false, "process existing off")
+	}
+	{
+		app := cli.NewApp()
+		var our_wc watch.Config
+		app.Flags = global_flags( &our_wc )
+		is := make_is(t)
+		app.Run([]string{"", "--archive=FISHBOWL", "--debug", "--process-existing"})
+		is(our_wc.ArchiveDir, "FISHBOWL", "archive dir")
+		is(our_wc.Debug, true, "debug on")
+		is(our_wc.ProcessExistingFiles, true, "process existing on")
+	}
 }
 
 func TestRunSimpleEcho(t *testing.T){

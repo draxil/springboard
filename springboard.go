@@ -41,15 +41,20 @@ func setup() (c []cli.Command, f []cli.Flag, cfg * watch.Config) {
 func global_flags( cfg * watch.Config )( f []cli.Flag){
 
 	f = []cli.Flag{
-		cli.BoolFlag{
-			Name : "debug",
-			Usage : "enable verbose messaging",
-			Destination : &cfg.Debug,
-		},
 		cli.StringFlag{
 			Name : "archive",
 			Usage : "move the file to this location after successful action",
 			Destination : &cfg.ArchiveDir,
+		},
+		cli.BoolFlag{
+			Name : "process-existing",
+			Usage : "Process any pre-existing files in the directory on startup. Obviously best used alongside an archive option of some kind.",
+			Destination : &cfg.ProcessExistingFiles,
+		},
+		cli.BoolFlag{
+			Name : "debug",
+			Usage : "enable verbose messaging",
+			Destination : &cfg.Debug,
 		},
 		cli.StringSliceFlag{
 			Name : "testing",
