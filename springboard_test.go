@@ -7,6 +7,9 @@ import (
 	"os"
 	"testing"
 	"time"
+	"net/http"
+	"net"
+	"log"
 //	"bytes"
 )
 
@@ -62,6 +65,10 @@ func Test_glob_opts(t *testing.T) {
 		app.Run([]string{""})
 		is(our_wc.Debug, false, "debug off")
 		is(our_wc.ProcessExistingFiles, false, "process existing off")
+
+		if our_wc.Paranoia != watch.NoParanoia {
+			t.Fatal("unexpected paranoia")
+		}
 	}
 	{
 		app := cli.NewApp()
@@ -101,6 +108,7 @@ func TestRunSimpleEcho(t *testing.T){
 	app.Run([]string{"", "--archive=" + string(os.PathSeparator) + arch_dir, 
 		"--testing=noblock",
 		"--testing=exit_after_one",
+		"--paranoia=off",
 		"--debug", "echo", temp_dir, })
 
 	original_filename := temp_dir + string(os.PathSeparator) + "foo"
@@ -147,8 +155,102 @@ func TestRunSimpleEcho(t *testing.T){
 	}
 
 	is(string(buf), original_filename + "\n", "echo process worked as expected")
-
 }
+
+func TestParanoia(t *testing.T){
+	skip_long(t)
+	app := app()
+	mk_temp_dir := func()(string){
+		s, e :=  ioutil.TempDir("", "springboard")
+		if e != nil {
+			panic(e)
+		}
+		return s
+	}
+	
+	l,_ := net.Listen("tcp","127.0.0.1:0")
+	addr := l.Addr().String()
+	read_ok := false
+	stuff_happened := false
+	body := ""
+	requests := 0
+	s := &http.Server{
+		Addr : addr,
+		Handler : http.HandlerFunc( func( w http.ResponseWriter, r *http.Request){
+			stuff_happened = true
+			requests++
+			body_bytes, err := ioutil.ReadAll( r.Body )
+			if err != nil {
+				log.Println( err )
+			}else{
+				body = string(body_bytes)
+				read_ok = true
+			}
+		}),
+	}
+
+
+	l.Close()
+	go s.ListenAndServe()
+	
+	temp_dir := mk_temp_dir()
+	arch_dir := mk_temp_dir()
+
+	app.Run([]string{"", "--archive=" + string(os.PathSeparator) + arch_dir, 
+		"--testing=noblock",
+		"--testing=exit_after_one",
+		"--debug", "post", "http://" + addr, temp_dir, })
+
+	original_filename := temp_dir + string(os.PathSeparator) + "foo"
+	f, oferr := os.Create(original_filename)
+	if oferr != nil {
+		panic(oferr)
+	}
+
+	f.Write(([]byte)("part one"))
+	time.Sleep( 250 * time.Millisecond )
+	f.Write(([]byte)("part two"))
+
+	done := make(chan bool)
+	timeout := make(chan bool)
+
+	go func(){
+		for {
+			_, fe := os.Stat( original_filename )
+			if os.IsNotExist( fe ) {
+				done <- true
+			}
+		}
+	}()
+	go func(){
+		time.Sleep(4 * time.Second)
+		timeout <- true
+	}()
+
+	select {
+	case <- done:
+	case <- timeout:
+		t.Fatal("Timed out awaitng file archive")
+	}
+	
+	is := make_is(t)
+	
+	_, fe := os.Stat( arch_dir + string(os.PathSeparator) + "foo")
+	is( fe, nil, "File stat on archive version of the file doesnt error")
+
+	
+	is( stuff_happened, true, "http server got a request")
+	is( read_ok, true, "Read ok")
+	is( body, "part onepart two", "body")
+	is( requests, 1, "got one request")
+}
+
+func skip_long( t *testing.T ){
+	if os.Getenv("LONGTESTS") != "1" {
+		t.Skip("Not running extended tests set LONGTESTS environment var to include these")
+	}
+}
+
 
 func make_is(t *testing.T) func(interface{}, interface{}, string) {
 	return func(a interface{}, b interface{}, describe string) {

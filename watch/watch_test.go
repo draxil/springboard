@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 func Test_NoAction(t *testing.T) {
@@ -215,7 +216,7 @@ func TestIgnoreDir(t *testing.T){
 
 
 	defer func() { os.Remove(temp_dir) }()
-	defer func() { os.Remove(arch_dir) }()
+
 	wait := make(chan bool)
 	filename := ""
 	expecting := 1
@@ -253,6 +254,91 @@ func TestIgnoreDir(t *testing.T){
 	file_in := make_file_in(t, "foo")
 	file_in( temp_dir + string(os.PathSeparator) + "arch", true, "foo gets archived")
 }
+
+func TestParanoiaOff( t *testing.T ){
+	skip_long(t)
+	check_paranoid( t, NoParanoia )
+}
+
+func TestParanoiaOn( t *testing.T ){
+	skip_long(t)
+	check_paranoid( t, BasicParanoia )
+}
+
+func check_paranoid( t *testing.T, paranoid ParanoiaLevel ){
+	mk_temp_dir := func() string {
+		s, e := ioutil.TempDir("", "springboard")
+		if e != nil {
+			panic(e)
+		}
+		return s
+	}
+
+	temp_dir := mk_temp_dir()
+	arch_dir := temp_dir + string(os.PathSeparator) + "arch"
+	derr := os.Mkdir( arch_dir, 0777 )
+	
+	if derr != nil {
+		panic(derr)
+	}
+
+
+	defer func() { os.Remove(temp_dir) }()
+
+	wait := make(chan bool)
+	filename := ""
+	expecting := 1
+	cfg := Config{
+		dont_block: true,
+		Dir:        temp_dir,
+		Debug:      true,
+		AfterFileAction: func(file string) {
+			expecting--
+			if expecting == 0 {
+				wait <- true
+				filename = file
+			}
+		},
+		ArchiveDir:           arch_dir,
+		ProcessExistingFiles: true,
+		Paranoia : paranoid,
+	}
+
+	Watch(&cfg)
+	
+	tfn := temp_dir + string(os.PathSeparator) + "foo"
+	f, err := os.Create(tfn)
+	if err != nil {
+		panic(err)
+	}
+	f.Write(([]byte)("part one"))
+	time.Sleep( 120 * time.Millisecond )
+	f.Write(([]byte)("part two"))
+	f.Close()
+
+	<-wait
+
+	file_in := make_file_in(t, "foo")
+	file_in( temp_dir + string(os.PathSeparator) + "arch", true, "foo in archive")
+	
+	tn := ""
+	if paranoid > NoParanoia {
+		tn = "foo not in input dir"
+	} else {
+		tn = "foo still in input dir"
+	}
+
+	file_in( temp_dir + string(os.PathSeparator) + "arch", true, tn)
+
+	
+}
+
+func skip_long( t *testing.T ){
+	if os.Getenv("LONGTESTS") != "1" {
+		t.Skip("Not running extended tests set LONGTESTS environment var to include these")
+	}
+}
+
 
 func make_file_in(t *testing.T, fn string) func(string, bool, string) {
 	return func(dir string, desired_result bool, describe string) {

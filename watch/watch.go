@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 /*
@@ -15,6 +16,14 @@ import (
 type Action interface {
 	Process(*Watcher, string)
 }
+
+const (
+	NoParanoia = 0 + iota
+	BasicParanoia
+	ExtraParanoia
+)
+
+type ParanoiaLevel int
 
 /*
   A watcher config: a directory to watch,  it's associated actions and any global options
@@ -25,6 +34,7 @@ type Config struct {
 	ArchiveDir           string                /* If set, place to store files after they have been successfully processed */
 	Dir                  string                /* Directory to watch */
 	ProcessExistingFiles bool                  /* Process pre-existing files on startup */
+	Paranoia             ParanoiaLevel         /* Wait and see if file is finished writing */
 	Debug                bool                  /* Verbose output */
 	TestingOptions       []string              /* Misc behaviour flags largely for testing */
 	dont_block           bool
@@ -129,7 +139,7 @@ func (w *Watcher) process_existing() {
 	}
 
 	for _, v := range fi {
-		w.debug("processing existing file: " + v)
+		w.debug("Processing existing file: " + v)
 
 		/* Unlike the usual entrypoint these are "just filenames" so glue on the path first */
 		path := w.Config.Dir + string(os.PathSeparator) + v
@@ -162,6 +172,12 @@ func (w *Watcher) handleFile(path string) {
 		defer release.Release()
 	}
 
+	if w.Config.Paranoia > NoParanoia {
+		for w.paranoiaWait(path) {
+			time.Sleep(250 * time.Millisecond)
+		}
+	}
+
 	w.actions_for_file(path)
 
 	_, filename := filepath.Split(path)
@@ -187,13 +203,58 @@ func (w *Watcher) wantFile(filepath string) bool {
 		w.debug(fmt.Sprintf("Could not stat file (%s): %s", filepath, err))
 		return false
 	}
-	
+
 	if fi.IsDir() {
 		w.debug("Rejecting dir")
 		return false
 	}
-	
+
+	// TODO: put this in as well when we have time to write a test
+	/*if ! fi.Mode().IsRegular() {
+		w.debug("Rejecting irregular file")
+		return false
+	}*/
+
 	return true
+}
+
+func (w *Watcher) paranoiaWait(filepath string) bool {
+	fi, err := os.Stat(filepath)
+	if err != nil {
+		w.debug("Could not stat file to determine if it's ready. Going ahead!")
+		return false
+	}
+
+	modtime := fi.ModTime()
+	now := time.Now()
+
+	if !now.After(modtime) {
+		w.debug("File modified in the future. Going ahead!")
+		return true
+	}
+
+	dur := now.Sub(modtime)
+
+	var waitfor time.Duration
+	switch w.Config.Paranoia {
+	case BasicParanoia:
+		{
+			waitfor = 2 * time.Second
+		}
+	case ExtraParanoia:
+		{
+			waitfor = 30 * time.Second
+		}
+	}
+
+	if dur <= waitfor {
+		w.debug("File modified recently, hang on")
+		return true
+	}
+
+	// go ahead
+	return false
+
 }
 
 func (w *Watcher) actions_for_file(file_path string) {
