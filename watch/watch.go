@@ -129,8 +129,8 @@ func (w *Watcher) process_existing() {
 	}
 
 	for _, v := range fi {
-		w.debug( "processing existing file: " + v )
-		
+		w.debug("processing existing file: " + v)
+
 		/* Unlike the usual entrypoint these are "just filenames" so glue on the path first */
 		path := w.Config.Dir + string(os.PathSeparator) + v
 		go w.handleFile(path)
@@ -146,6 +146,11 @@ func (w *Watcher) handle_event(e *fsnotify.Event) {
 }
 
 func (w *Watcher) handleFile(path string) {
+
+	if !w.wantFile(path) {
+		return
+	}
+
 	release, existed, err := flock.New(path)
 
 	if !existed {
@@ -174,6 +179,21 @@ func (w *Watcher) handleFile(path string) {
 	if v := w.test_opts["exit_after_one"]; v {
 		w.Close()
 	}
+}
+
+func (w *Watcher) wantFile(filepath string) bool {
+	fi, err := os.Stat(filepath)
+	if err != nil {
+		w.debug(fmt.Sprintf("Could not stat file (%s): %s", filepath, err))
+		return false
+	}
+	
+	if fi.IsDir() {
+		w.debug("Rejecting dir")
+		return false
+	}
+	
+	return true
 }
 
 func (w *Watcher) actions_for_file(file_path string) {
