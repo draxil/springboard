@@ -3,6 +3,7 @@ package watch
 import (
 	"fmt"
 	"github.com/prometheus/prometheus/util/flock"
+	"github.com/draxil/gomv"
 	"gopkg.in/fsnotify.v1"
 	"log"
 	"os"
@@ -183,7 +184,7 @@ func (w *Watcher) handleFile(path string) {
 	_, filename := filepath.Split(path)
 
 	if w.Config.ArchiveDir != "" {
-		e := os.Rename(path, w.Config.ArchiveDir+string(os.PathSeparator)+filename)
+		e := gomv.MoveFile(path, w.Config.ArchiveDir+string(os.PathSeparator)+filename)
 		if e != nil {
 			w.debug(e)
 		}
