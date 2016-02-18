@@ -52,5 +52,6 @@ springboard ignores directories, so it's completely safe to have subdirectories 
 * Error handling behaviour
 * Picking up files that appeared while springboard was "off" 
 * Filtering / regex for being selective
+* Base paranoia desisions on fsnotify events rather than updated times?
 
 Please feel free to shout at me if I'm missing something you need.
