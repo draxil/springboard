@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const version = "0.1.0"
+const version = "0.2.0"
 const author = "Joe Higton"
 const author_email = "draxil@gmail.com"
 

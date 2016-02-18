@@ -54,3 +54,8 @@ springboard ignores directories, so it's completely safe to have subdirectories 
 * Filtering / regex for being selective
 
 Please feel free to shout at me if I'm missing something you need.
+
+# versions
+
+* v0.1.0 - First useful version
+* v0.2.0 - 
