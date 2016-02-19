@@ -36,8 +36,6 @@ func (a *PostAction) Process(w *Watcher, file string) {
 	}
 
 	req.Header.Set("Content-Type", mime_type)
-	req.Header.Set("Content-Length", "500")
-
 
 	if len(a.BasicAuthUsername) > 0 {
 		req.SetBasicAuth(a.BasicAuthUsername, a.BasicAuthPwd)
