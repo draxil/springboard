@@ -55,12 +55,12 @@ func wrap_cmd(cfg *watch.Config, c cli.Command) cli.Command {
 
 func setup_action(cfg *watch.Config, c *cli.Context) {
 	sparanoia := c.GlobalString("paranoia")
-	switch sparanoia{
+	switch sparanoia {
 	case "off":
 		cfg.Paranoia = watch.NoParanoia
 	case "basic":
 		cfg.Paranoia = watch.BasicParanoia
-        case "extra":
+	case "extra":
 		cfg.Paranoia = watch.ExtraParanoia
 	default:
 		fmt.Fprintln(os.Stderr, "Invalid choice of paranoia=", c)
@@ -78,6 +78,11 @@ func global_flags(cfg *watch.Config) (f []cli.Flag) {
 			Destination: &cfg.ArchiveDir,
 		},
 		cli.StringFlag{
+			Name:        "error-dir",
+			Usage:       "move the file to this location after a failed action",
+			Destination: &cfg.ErrorDir,
+		},
+		cli.StringFlag{
 			Name:  "paranoia",
 			Usage: "Do we take extra steps to ensure the file has been completely written? See documentation for full details. Values: off, basic, extra.",
 			Value: "basic",
@@ -89,8 +94,18 @@ func global_flags(cfg *watch.Config) (f []cli.Flag) {
 		},
 		cli.BoolFlag{
 			Name:        "debug",
-			Usage:       "enable verbose messaging",
+			Usage:       "enable verbose debug output",
 			Destination: &cfg.Debug,
+		},
+		cli.BoolTFlag{
+			Name:        "log-errors",
+			Usage:       "enable logging of errors (default=true)",
+			Destination: &cfg.ReportErrors,
+		},
+		cli.BoolFlag{
+			Name:        "log-actions",
+			Usage:       "enable logging of actions",
+			Destination: &cfg.ReportActions,
 		},
 		cli.StringSliceFlag{
 			Name:  "testing",

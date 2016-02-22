@@ -65,7 +65,8 @@ func Test_glob_opts(t *testing.T) {
 		app.Run([]string{""})
 		is(our_wc.Debug, false, "debug off")
 		is(our_wc.ProcessExistingFiles, false, "process existing off")
-
+		is(our_wc.ReportErrors, true, "Error reportin on by default")
+		is(our_wc.ReportActions, false, "Action reporting on by default");
 		if our_wc.Paranoia != watch.NoParanoia {
 			t.Fatal("unexpected paranoia")
 		}
@@ -75,9 +76,12 @@ func Test_glob_opts(t *testing.T) {
 		var our_wc watch.Config
 		app.Flags = global_flags( &our_wc )
 		is := make_is(t)
-		app.Run([]string{"", "--archive=FISHBOWL", "--debug", "--process-existing"})
+		app.Run([]string{"", "--archive=FISHBOWL", "--error-dir=CATBASKET", "--debug", "--log-actions", "--log-errors=false", "--process-existing"})
 		is(our_wc.ArchiveDir, "FISHBOWL", "archive dir")
+		is(our_wc.ErrorDir, "CATBASKET", "error dir")
 		is(our_wc.Debug, true, "debug on")
+		is(our_wc.ReportActions, true, "action reporting on")
+		is(our_wc.ReportErrors, false, "error reporting off")
 		is(our_wc.ProcessExistingFiles, true, "process existing on")
 	}
 }
