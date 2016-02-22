@@ -67,3 +67,5 @@ Please feel free to shout at me if I'm missing something you need.
 Much of the development time for this tool comes from printevolved, if you need print or print technology:
 
 [http://www.printevolved.co.uk](http://www.printevolved.co.uk)
+--
+[![Build Status](https://travis-ci.org/draxil/springboard.svg?branch=master)](https://travis-ci.org/draxil/springboard)
