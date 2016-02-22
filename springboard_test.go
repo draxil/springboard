@@ -75,8 +75,9 @@ func Test_glob_opts(t *testing.T) {
 		var our_wc watch.Config
 		app.Flags = global_flags( &our_wc )
 		is := make_is(t)
-		app.Run([]string{"", "--archive=FISHBOWL", "--debug", "--process-existing"})
+		app.Run([]string{"", "--archive=FISHBOWL", "--error-dir=CATBASKET", "--debug", "--process-existing"})
 		is(our_wc.ArchiveDir, "FISHBOWL", "archive dir")
+		is(our_wc.ErrorDir, "CATBASKET", "error dir")
 		is(our_wc.Debug, true, "debug on")
 		is(our_wc.ProcessExistingFiles, true, "process existing on")
 	}

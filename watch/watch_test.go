@@ -83,6 +83,70 @@ func TestArchive(t *testing.T) {
 	file_in(temp_dir, false, "File is NOT in source dir")
 }
 
+func TestErrorDir(t *testing.T){
+	mk_temp_dir := func() string {
+		s, e := ioutil.TempDir("", "springboard")
+		if e != nil {
+			panic(e)
+		}
+		return s
+	}
+
+	temp_dir := mk_temp_dir()
+	arch_dir := mk_temp_dir()
+	err_dir := mk_temp_dir()
+
+	defer func() { os.Remove(temp_dir) }()
+	defer func() { os.Remove(arch_dir) }()
+	defer func() { os.Remove(err_dir) }()
+
+	wait := make(chan bool)
+	filename := ""
+
+	action := DummyAction{}
+	cfg := Config{
+		dont_block: true,
+		Dir:        temp_dir,
+		Debug:      true,
+		Actions:    []Action{ &action },
+		AfterFileAction: func(file string) {
+			wait <- true
+			filename = file
+		},
+		ArchiveDir: arch_dir,
+		ErrorDir:   err_dir,
+	}
+
+	Watch(&cfg)
+
+	_, err := os.Create(temp_dir + string(os.PathSeparator) + "foo")
+	if err != nil {
+		panic(err)
+	}
+	<-wait
+	action.FailPlease = true
+
+	_, err = os.Create(temp_dir + string(os.PathSeparator) + "bar")
+	if err != nil {
+		panic(err)
+	}
+	<-wait
+
+	
+	{
+		file_in := make_file_in(t, "foo")
+		file_in(arch_dir, true, "File IS in arch dir")
+		file_in(err_dir, false, "File is NOT in err dir")
+		file_in(temp_dir, false, "File is NOT in source dir")
+	}
+	{
+		file_in := make_file_in(t, "bar")
+		file_in(arch_dir, false, "File is NOT in arch dir")
+		file_in(err_dir, true, "File IS in err dir")
+		file_in(temp_dir, false, "File is NOT in source dir")
+	}
+}
+
 func TestHandleExistingOff(t *testing.T) {
 	mk_temp_dir := func() string {
 		s, e := ioutil.TempDir("", "springboard")

@@ -78,6 +78,11 @@ func global_flags(cfg *watch.Config) (f []cli.Flag) {
 			Destination: &cfg.ArchiveDir,
 		},
 		cli.StringFlag{
+			Name:        "error-dir",
+			Usage:       "move the file to this location after a failed action",
+			Destination: &cfg.ErrorDir,
+		},
+		cli.StringFlag{
 			Name:  "paranoia",
 			Usage: "Do we take extra steps to ensure the file has been completely written? See documentation for full details. Values: off, basic, extra.",
 			Value: "basic",

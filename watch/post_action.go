@@ -13,14 +13,14 @@ type PostAction struct {
 	BasicAuthPwd      string
 }
 
-func (a *PostAction) Process(w *Watcher, file string) {
+func (a *PostAction) Process(w *Watcher, file string) bool {
 	w.debug("Attempting to post ", file, " to ", a.To)
 	mime_type := a.Mime
 	reader, err := os.Open(file)
 
 	if err != nil {
 		w.debug("error opeing file ", file, " ", err)
-		return
+		return false
 	}
 
 	if mime_type == "" {
@@ -32,7 +32,7 @@ func (a *PostAction) Process(w *Watcher, file string) {
 
 	if err != nil {
 		w.debug("Error building request: ", err)
-		return
+		return false
 	}
 
 	req.Header.Set("Content-Type", mime_type)
@@ -48,9 +48,13 @@ func (a *PostAction) Process(w *Watcher, file string) {
 
 	if err != nil {
 		w.debug("Posting ", file, " to ", a.To, " failed ", err)
-		return
+		return false
 	}
 
 	w.debug("Got response ", rsp.Status)
+	if rsp.StatusCode != http.StatusOK {
+		return false
+	}
 
+	return true
 }

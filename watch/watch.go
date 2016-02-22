@@ -15,7 +15,7 @@ import (
    describes the interface required of a directory action, eg PostAction
 */
 type Action interface {
-	Process(*Watcher, string)
+	Process(*Watcher, string) bool
 }
 
 const (
@@ -33,6 +33,7 @@ type Config struct {
 	Actions              []Action              /* List of actions to perform when new files arrive */
 	AfterFileAction      func(filename string) /* Callback to call after a file action */
 	ArchiveDir           string                /* If set, place to store files after they have been successfully processed */
+	ErrorDir             string                /* If set, place to store files if an action fails */
 	Dir                  string                /* Directory to watch */
 	ProcessExistingFiles bool                  /* Process pre-existing files on startup */
 	Paranoia             ParanoiaLevel         /* Wait and see if file is finished writing */
@@ -179,15 +180,28 @@ func (w *Watcher) handleFile(path string) {
 		}
 	}
 
-	w.actions_for_file(path)
+	actions_ok := w.actions_for_file(path)
 
 	_, filename := filepath.Split(path)
 
-	if w.Config.ArchiveDir != "" {
-		e := gomv.MoveFile(path, w.Config.ArchiveDir+string(os.PathSeparator)+filename)
-		if e != nil {
-			w.debug(e)
+	already_archived := false
+	archive := func( dir string ){
+		if ! already_archived {
+			w.debug( "Archiving ", path, " to ",dir )
+			e := gomv.MoveFile(path, dir+string(os.PathSeparator)+filename)
+			if e != nil {
+				w.debug(e)
+			}else{
+				already_archived = true
+			}
 		}
+	}
+	
+	if !actions_ok && w.Config.ErrorDir != "" {
+		archive( w.Config.ErrorDir )
+	}
+	if w.Config.ArchiveDir != "" {
+		archive( w.Config.ArchiveDir )
 	}
 
 	if w.Config.AfterFileAction != nil {
@@ -258,10 +272,14 @@ func (w *Watcher) paranoiaWait(filepath string) bool {
 
 }
 
-func (w *Watcher) actions_for_file(file_path string) {
+func (w *Watcher) actions_for_file(file_path string) (bool) {
 	for _, v := range w.Config.Actions {
-		v.Process(w, file_path)
+		ok := v.Process(w, file_path)
+		if( ! ok ){
+			return false
+		}
 	}
+	return true
 }
 
 func (w *Watcher) debug(things ...interface{}) {
