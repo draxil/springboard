@@ -38,6 +38,8 @@ type Config struct {
 	ProcessExistingFiles bool                  /* Process pre-existing files on startup */
 	Paranoia             ParanoiaLevel         /* Wait and see if file is finished writing */
 	Debug                bool                  /* Verbose output */
+	ReportActions        bool                  /* Log actions */
+	ReportErrors         bool                  /* Error output */
 	TestingOptions       []string              /* Misc behaviour flags largely for testing */
 	dont_block           bool
 }
@@ -141,7 +143,7 @@ func (w *Watcher) process_existing() {
 	}
 
 	for _, v := range fi {
-		w.debug("Processing existing file: " + v)
+		w.report_action("Processing existing file: " + v)
 
 		/* Unlike the usual entrypoint these are "just filenames" so glue on the path first */
 		path := w.Config.Dir + string(os.PathSeparator) + v
@@ -187,10 +189,10 @@ func (w *Watcher) handleFile(path string) {
 	already_archived := false
 	archive := func( dir string ){
 		if ! already_archived {
-			w.debug( "Archiving ", path, " to ",dir )
+			w.report_action( "Archiving ", path, " to ",dir )
 			e := gomv.MoveFile(path, dir+string(os.PathSeparator)+filename)
 			if e != nil {
-				w.debug(e)
+				w.error(e)
 			}else{
 				already_archived = true
 			}
@@ -236,7 +238,7 @@ func (w *Watcher) wantFile(filepath string) bool {
 func (w *Watcher) paranoiaWait(filepath string) bool {
 	fi, err := os.Stat(filepath)
 	if err != nil {
-		w.debug("Could not stat file to determine if it's ready. Going ahead!")
+		w.error("Could not stat file to determine if it's ready. Going ahead!")
 		return false
 	}
 
@@ -244,7 +246,7 @@ func (w *Watcher) paranoiaWait(filepath string) bool {
 	now := time.Now()
 
 	if !now.After(modtime) {
-		w.debug("File modified in the future. Going ahead!")
+		w.error("File modified in the future. Going ahead!")
 		return true
 	}
 
@@ -282,8 +284,26 @@ func (w *Watcher) actions_for_file(file_path string) (bool) {
 	return true
 }
 
+
+func (w *Watcher) report_action(things ...interface{}) {
+	if w.Config.ReportActions {
+		w.report(things)
+	}
+}
 func (w *Watcher) debug(things ...interface{}) {
 	if w.Config.Debug {
+		w.report(things)
+	}
+}
+
+func (w *Watcher) error(things ...interface{}) {
+	if w.Config.ReportErrors || w.Config.Debug {
+		w.report(things)
+	}
+}
+
+func (w *Watcher) report(things ...interface{}) {
+	if w.Config.ReportErrors  || w.Config.Debug  {
 		log.Println(things)
 	}
 }

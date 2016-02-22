@@ -14,12 +14,12 @@ type PostAction struct {
 }
 
 func (a *PostAction) Process(w *Watcher, file string) bool {
-	w.debug("Attempting to post ", file, " to ", a.To)
+	w.report_action("Attempting to post ", file, " to ", a.To)
 	mime_type := a.Mime
 	reader, err := os.Open(file)
 
 	if err != nil {
-		w.debug("error opeing file ", file, " ", err)
+		w.error("Error opeing file ", file, " ", err)
 		return false
 	}
 
@@ -31,7 +31,7 @@ func (a *PostAction) Process(w *Watcher, file string) bool {
 	req, err := http.NewRequest("POST", a.To, reader)
 
 	if err != nil {
-		w.debug("Error building request: ", err)
+		w.error("Error building request: ", err)
 		return false
 	}
 
@@ -47,14 +47,16 @@ func (a *PostAction) Process(w *Watcher, file string) bool {
 	rsp, err := cli.Do(req)
 
 	if err != nil {
-		w.debug("Posting ", file, " to ", a.To, " failed ", err)
+		w.error("Posting ", file, " to ", a.To, " failed ", err)
 		return false
 	}
 
 	w.debug("Got response ", rsp.Status)
 	if rsp.StatusCode != http.StatusOK {
+		w.error( "POST failed ", rsp.Status )
 		return false
 	}
 
+	w.report_action("POST sucessful")
 	return true
 }
