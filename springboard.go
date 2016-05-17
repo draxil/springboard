@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const version = "0.2.0"
+const version = "0.2.1"
 const author = "Joe Higton"
 const author_email = "draxil@gmail.com"
 
@@ -45,7 +45,7 @@ func setup() (c []cli.Command, f []cli.Flag, cfg *watch.Config) {
 }
 
 func wrap_cmd(cfg *watch.Config, c cli.Command) cli.Command {
-	a := c.Action
+	a := c.Action.(func(*cli.Context))
 	c.Action = func(c *cli.Context) {
 		setup_action(cfg, c)
 		a(c)
