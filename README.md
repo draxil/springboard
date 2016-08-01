@@ -1,7 +1,7 @@
 # springboard
 Watch a directory for new files and bounce them on somewhere else:
 
-OR Simple "drop folder to POST request (or whatever)".
+OR Simple "drop folder to an HTTP POST request (or whatever)".
 
 # usage
 
