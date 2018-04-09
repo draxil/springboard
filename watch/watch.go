@@ -2,7 +2,7 @@ package watch
 
 import (
 	"fmt"
-	"github.com/prometheus/prometheus/util/flock"
+	"github.com/theckman/go-flock"
 	"github.com/draxil/gomv"
 	"gopkg.in/fsnotify.v1"
 	"log"
@@ -165,15 +165,13 @@ func (w *Watcher) handleFile(path string) {
 		return
 	}
 
-	release, existed, err := flock.New(path)
-
-	if !existed {
-		w.debug("File didn't exist flock will have created it. I am too chicken to delete things though.. ")
-	}
-	if err != nil {
-		w.debug("Lock failed")
+	file_lock := flock.NewFlock(path)
+	locked, err := file_lock.TryLock()
+	
+	if err != nil || !locked {
+		w.error("Lock failed")
 	} else {
-		defer release.Release()
+		defer file_lock.Unlock()
 	}
 
 	if w.Config.Paranoia > NoParanoia {

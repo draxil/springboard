@@ -1,0 +1,4 @@
+
+* Better flock handling / tests
+* Better documentation, especially outside the godoc to explain things
+* Have a website again.
