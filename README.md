@@ -19,7 +19,7 @@ And similarly for the options pertaining to the subcommands and actions:
 
 # installing
 
-1. Get go (version 1.4+)
+1. Get go (version 1.7+)
 2. Make sure you have set $GOPATH to a sensible place you can write to. 
 3. Issue:
 > go get -u github.com/draxil/springboard
