@@ -147,6 +147,7 @@ func (w *Watcher) process_existing() {
 
 		/* Unlike the usual entrypoint these are "just filenames" so glue on the path first */
 		path := w.Config.Dir + string(os.PathSeparator) + v
+		path = filepath.Clean(path)
 		go w.handleFile(path)
 	}
 }
