@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/draxil/springboard/watch"
 	"io/ioutil"
 	"os"
@@ -98,6 +98,11 @@ func TestRunSimpleEcho(t *testing.T){
 	
 	temp_dir := mk_temp_dir()
 	arch_dir := mk_temp_dir()
+	defer func(){
+		os.Remove( arch_dir )
+		os.Remove( temp_dir )
+	}()
+
 	out, ferr := ioutil.TempFile("", "springboard")
 	if ferr != nil {
 		panic( ferr )
@@ -160,6 +165,142 @@ func TestRunSimpleEcho(t *testing.T){
 
 	is(string(buf), original_filename + "\n", "echo process worked as expected")
 }
+
+func TestSimpleRun(t *testing.T){
+	app := app()
+	mk_temp_dir := func()(string){
+		s, e :=  ioutil.TempDir("", "springboard")
+		if e != nil {
+			panic(e)
+		}
+		return s
+	}
+	
+	temp_dir := mk_temp_dir()
+	arch_dir := mk_temp_dir()
+	other_dir := mk_temp_dir();
+
+	defer func(){
+		os.Remove( temp_dir )
+		os.Remove( arch_dir )
+		os.Remove( other_dir )
+	}()
+	
+	app.Run([]string{"", "--archive=" + string(os.PathSeparator) + arch_dir, 
+		"--testing=noblock",
+		"--testing=exit_after_one",
+		"--paranoia=off",
+		"--log-actions",
+		"--debug", "run", "watch/test1.sh", other_dir, temp_dir, })
+
+	original_filename := temp_dir + string(os.PathSeparator) + "foo"
+	_, oferr := os.Create(original_filename)
+	if oferr != nil {
+		panic(oferr)
+	}
+	
+	done := make(chan bool)
+	timeout := make(chan bool)
+
+	go func(){
+		for {
+			_, fe := os.Stat( original_filename )
+			if os.IsNotExist( fe ) {
+				done <- true
+			}
+		}
+	}()
+	go func(){
+		time.Sleep(2 * time.Second)
+		timeout <- true
+	}()
+
+	select {
+	case <- done:
+	case <- timeout:
+		t.Fatal("Timed out awaitng file archive")
+	}
+	
+	
+	is := make_is(t)
+	
+	_, fe := os.Stat( arch_dir + string(os.PathSeparator) + "foo")
+	is( fe, nil, "File stat on archive version of the file doesnt error")
+
+	_, fe = os.Stat( other_dir + string(os.PathSeparator) + "foo")
+	is( fe, nil, "File stat on run created version of the file doesnt error")
+
+
+}
+
+
+func TestPostargRun(t *testing.T){
+	app := app()
+	mk_temp_dir := func()(string){
+		s, e :=  ioutil.TempDir("", "springboard")
+		if e != nil {
+			panic(e)
+		}
+		return s
+	}
+	
+	temp_dir := mk_temp_dir()
+	arch_dir := mk_temp_dir()
+	other_dir := mk_temp_dir();
+
+	defer func(){
+		os.Remove( temp_dir )
+		os.Remove( arch_dir )
+		os.Remove( other_dir )
+	}()
+	
+	app.Run([]string{"", "--archive=" + string(os.PathSeparator) + arch_dir, 
+		"--testing=noblock",
+		"--testing=exit_after_one",
+		"--paranoia=off",
+		"--log-actions",
+		"--debug", "run", "--postarg=" + other_dir, "/bin/cp", temp_dir, })
+
+	original_filename := temp_dir + string(os.PathSeparator) + "foo"
+	_, oferr := os.Create(original_filename)
+	if oferr != nil {
+		panic(oferr)
+	}
+	
+	done := make(chan bool)
+	timeout := make(chan bool)
+
+	go func(){
+		for {
+			_, fe := os.Stat( original_filename )
+			if os.IsNotExist( fe ) {
+				done <- true
+			}
+		}
+	}()
+	go func(){
+		time.Sleep(2 * time.Second)
+		timeout <- true
+	}()
+
+	select {
+	case <- done:
+	case <- timeout:
+		t.Fatal("Timed out awaitng file archive")
+	}
+	
+	
+	is := make_is(t)
+	
+	_, fe := os.Stat( arch_dir + string(os.PathSeparator) + "foo")
+	is( fe, nil, "File stat on archive version of the file doesnt error")
+
+	_, fe = os.Stat( other_dir + string(os.PathSeparator) + "foo")
+	is( fe, nil, "File stat on run created version of the file doesnt error")
+
+
+}
+
 
 func TestParanoia(t *testing.T){
 	skip_long(t)

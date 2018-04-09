@@ -202,7 +202,7 @@ func (w *Watcher) handleFile(path string) {
 	if !actions_ok && w.Config.ErrorDir != "" {
 		archive( w.Config.ErrorDir )
 	}
-	if w.Config.ArchiveDir != "" {
+	if actions_ok && w.Config.ArchiveDir != "" {
 		archive( w.Config.ArchiveDir )
 	}
 
