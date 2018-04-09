@@ -1,5 +1,5 @@
 # springboard
-Watch a directory (drop folder) for new files and "bounce" them on somewhere else, via several means such as HTTP post or anothoer command.
+Watch a directory (drop folder) for new files and "bounce" them on somewhere else, via several means such as HTTP post or another command.
 
 # usage
 
@@ -35,7 +35,7 @@ You will want to make sure that your $GOPATH/bin is in your $PATH or else move t
  
 # API
 
-The code effective funtionality could be useful to a go coder independent of the command itself. I'll post a godoc link here once the documentation is in any kind of shape. If you particularly want this please shout at me.
+The code effective funtionality could be useful to a go coder independent of the command itself. I'll post a godoc link here once the documentation is in any kind of shape. If you particularly want this, please shout at me.
 
 # Fiddly details
 
@@ -48,15 +48,14 @@ springboard ignores directories, so it's completely safe to have subdirectories 
  This is at an early stage of development and is subject to change! Upcoming additions:
  
 * Error handling behaviour
-* Picking up files that appeared while springboard was "off" 
 * Filtering / regex for being selective
 * Base paranoia desisions on fsnotify events rather than updated times?
 
-Please feel free to shout at me if I'm missing something you need.
+Please feel free to contact at me if I'm missing something you need.
 
 # versions
 
-* v0.3.0 - run action, fix to archive behaviour, fixed dissappearing flock library
+* v0.3.0 - run action, fix to archive behaviour, fixed disappearing flock library
 * v0.2.1 - go 1.6 compile fixes
 * v0.2.0 - Better error handing, better logging
 * v0.1.0 - First useful version
