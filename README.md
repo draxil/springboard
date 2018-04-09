@@ -56,7 +56,7 @@ Please feel free to shout at me if I'm missing something you need.
 
 # versions
 
-* v0.3.0 - run action, fix to archive behaviour
+* v0.3.0 - run action, fix to archive behaviour, fixed dissappearing flock library
 * v0.2.1 - go 1.6 compile fixes
 * v0.2.0 - Better error handing, better logging
 * v0.1.0 - First useful version
