@@ -28,9 +28,10 @@ You will want to make sure that your $GOPATH/bin is in your $PATH or else move t
 
 # actions
  
- So far there are two actions:
+ So far the available actions are:
  
  * post - Send the file content as an HTTP POST request
+ * run  - Execute a command with the new filename as an argument  
  * echo - Echo the file path to stdout (good for building shell pipelines)
  
 # API
