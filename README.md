@@ -35,7 +35,7 @@ You will want to make sure that your $GOPATH/bin is in your $PATH or else move t
  
 # API
 
-The code effective funtionality could be useful to a go coder independent of the command itself. I'll post a godoc link here once the documentation is in any kind of shape. If you particularly want this please shout at me.
+The code effective funtionality could be useful to a go coder independent of the command itself. I'll post a godoc link here once the documentation is in any kind of shape. If you particularly want this, please shout at me.
 
 # Fiddly details
 
