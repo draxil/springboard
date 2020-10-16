@@ -9,7 +9,7 @@ import (
 
 const version = "0.3.1"
 const author = "Joe Higton"
-const author_email = "draxil@gmail.com"
+const authorEmail = "draxil@gmail.com"
 
 func main() {
 	app := app()
@@ -24,37 +24,37 @@ func app() *cli.App {
 	app.Commands = commands
 	app.Version = version
 	app.Authors = []cli.Author{cli.Author{Name: author,
-		Email: author_email}}
+		Email: authorEmail}}
 	app.Flags = flags
 	return app
 }
 
 func setup() (c []cli.Command, f []cli.Flag, cfg *watch.Config) {
 	cfg = &watch.Config{}
-	f = global_flags(cfg)
+	f = globalFlags(cfg)
 
-	add_command := func(cmd cli.Command) {
-		cmd = wrap_cmd(cfg, cmd)
+	addCommand := func(cmd cli.Command) {
+		cmd = wrapCmd(cfg, cmd)
 		c = append(c, cmd)
 	}
 
-	add_command(http_post_command(cfg, run_watch))
-	add_command(echo_command(cfg, run_watch))
-	add_command(run_command(cfg, run_watch))
+	addCommand(http_post_command(cfg, run_watch))
+	addCommand(echo_command(cfg, run_watch))
+	addCommand(run_command(cfg, run_watch))
 
 	return
 }
 
-func wrap_cmd(cfg *watch.Config, c cli.Command) cli.Command {
+func wrapCmd(cfg *watch.Config, c cli.Command) cli.Command {
 	a := c.Action.(func(*cli.Context))
 	c.Action = func(c *cli.Context) {
-		setup_action(cfg, c)
+		setupAction(cfg, c)
 		a(c)
 	}
 	return c
 }
 
-func setup_action(cfg *watch.Config, c *cli.Context) {
+func setupAction(cfg *watch.Config, c *cli.Context) {
 	sparanoia := c.GlobalString("paranoia")
 	switch sparanoia {
 	case "off":
@@ -70,7 +70,7 @@ func setup_action(cfg *watch.Config, c *cli.Context) {
 	}
 }
 
-func global_flags(cfg *watch.Config) (f []cli.Flag) {
+func globalFlags(cfg *watch.Config) (f []cli.Flag) {
 
 	f = []cli.Flag{
 		cli.StringFlag{

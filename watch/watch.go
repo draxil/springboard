@@ -2,8 +2,8 @@ package watch
 
 import (
 	"fmt"
-	"github.com/theckman/go-flock"
 	"github.com/draxil/gomv"
+	"github.com/theckman/go-flock"
 	"gopkg.in/fsnotify.v1"
 	"log"
 	"os"
@@ -41,7 +41,7 @@ type Config struct {
 	ReportActions        bool                  /* Log actions */
 	ReportErrors         bool                  /* Error output */
 	TestingOptions       []string              /* Misc behaviour flags largely for testing */
-	dont_block           bool
+	dontBlock            bool
 }
 
 /*
@@ -88,7 +88,7 @@ func (w *Watcher) run() error {
 	}
 
 	if w.test_opts["noblock"] {
-		w.Config.dont_block = true
+		w.Config.dontBlock = true
 	}
 
 	done := make(chan bool)
@@ -122,7 +122,7 @@ func (w *Watcher) run() error {
 	/* Assuming all has gone well (and config isn't telling us not to block)
 	   then just wait for a signal down our "done" channel
 	*/
-	if werr == nil && !w.Config.dont_block {
+	if werr == nil && !w.Config.dontBlock {
 		<-done
 		defer w.Close()
 	}
@@ -168,7 +168,7 @@ func (w *Watcher) handleFile(path string) {
 
 	file_lock := flock.NewFlock(path)
 	locked, err := file_lock.TryLock()
-	
+
 	if err != nil || !locked {
 		w.error("Lock failed")
 	} else {
@@ -186,23 +186,23 @@ func (w *Watcher) handleFile(path string) {
 	_, filename := filepath.Split(path)
 
 	already_archived := false
-	archive := func( dir string ){
-		if ! already_archived {
-			w.report_action( "Archiving ", path, " to ",dir )
+	archive := func(dir string) {
+		if !already_archived {
+			w.report_action("Archiving ", path, " to ", dir)
 			e := gomv.MoveFile(path, dir+string(os.PathSeparator)+filename)
 			if e != nil {
 				w.error(e)
-			}else{
+			} else {
 				already_archived = true
 			}
 		}
 	}
-	
+
 	if !actions_ok && w.Config.ErrorDir != "" {
-		archive( w.Config.ErrorDir )
+		archive(w.Config.ErrorDir)
 	}
 	if actions_ok && w.Config.ArchiveDir != "" {
-		archive( w.Config.ArchiveDir )
+		archive(w.Config.ArchiveDir)
 	}
 
 	if w.Config.AfterFileAction != nil {
@@ -273,36 +273,35 @@ func (w *Watcher) paranoiaWait(filepath string) bool {
 
 }
 
-func (w *Watcher) actions_for_file(file_path string) (bool) {
+func (w *Watcher) actions_for_file(file_path string) bool {
 	for _, v := range w.Config.Actions {
 		ok := v.Process(w, file_path)
-		if( ! ok ){
+		if !ok {
 			return false
 		}
 	}
 	return true
 }
 
-
 func (w *Watcher) report_action(things ...interface{}) {
 	if w.Config.ReportActions {
-		w.report(things)
+		w.report(things...)
 	}
 }
 func (w *Watcher) debug(things ...interface{}) {
 	if w.Config.Debug {
-		w.report(things)
+		w.report(things...)
 	}
 }
 
 func (w *Watcher) error(things ...interface{}) {
 	if w.Config.ReportErrors || w.Config.Debug {
-		w.report(things)
+		w.report(things...)
 	}
 }
 
 func (w *Watcher) report(things ...interface{}) {
-	if w.Config.ReportErrors  || w.Config.Debug  {
-		log.Println(things)
+	if w.Config.ReportErrors || w.Config.Debug {
+		log.Println(things...)
 	}
 }

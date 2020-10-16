@@ -11,25 +11,25 @@ import (
 
 func Test_RunOK(t *testing.T) {
 
-	temp_dir, err := ioutil.TempDir("", "springboard")
+	tempDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(temp_dir) }()
+	defer func() { os.Remove(tempDir) }()
 
-	arch_dir, err := ioutil.TempDir("", "springboard")
+	archDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(arch_dir) }()
+	defer func() { os.Remove(archDir) }()
 
 	wait := make(chan bool)
 	cfg := Config{
-		dont_block: true,
-		Dir:        temp_dir,
+		dontBlock: true,
+		Dir:        tempDir,
 		Debug:      false,
 		// using an archive dir as this shows command OK nicely
-		ArchiveDir : arch_dir,
+		ArchiveDir : archDir,
 		ReportActions : true,
 		Actions: []Action{
 			&RunAction{
@@ -42,19 +42,19 @@ func Test_RunOK(t *testing.T) {
 	}
 
 	Watch(&cfg)
-	temp_file, err := ioutil.TempFile("", "springboard")
+	tempFile, err := ioutil.TempFile("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	log.Println(temp_file.Name())
-	defer func() { os.Remove(temp_file.Name()) }()
-	temp_file.Write([]byte("kruncha6"))
-	temp_file.Close()
-	os.Rename(temp_file.Name(), temp_dir+string(os.PathSeparator)+"foo")
+	//log.Println(tempFile.Name())
+	defer func() { os.Remove(tempFile.Name()) }()
+	tempFile.Write([]byte("kruncha6"))
+	tempFile.Close()
+	os.Rename(tempFile.Name(), tempDir+string(os.PathSeparator)+"foo")
 
 	<-wait
 
-	_, err = os.Open(temp_dir + string(os.PathSeparator) + "foo")
+	_, err = os.Open(tempDir + string(os.PathSeparator) + "foo")
 	if err == nil {
 		t.Error("Able to open the file which should have gone")
 	}
@@ -62,25 +62,25 @@ func Test_RunOK(t *testing.T) {
 
 func Test_RunFail(t *testing.T) {
 
-	temp_dir, err := ioutil.TempDir("", "springboard")
+	tempDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(temp_dir) }()
+	defer func() { os.Remove(tempDir) }()
 
-	arch_dir, err := ioutil.TempDir("", "springboard")
+	archDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(arch_dir) }()
+	defer func() { os.Remove(archDir) }()
 
 	wait := make(chan bool)
 	cfg := Config{
-		dont_block: true,
-		Dir:        temp_dir,
+		dontBlock: true,
+		Dir:        tempDir,
 		Debug:      true,
 		// using an archive dir as this shows command OK nicely
-		ArchiveDir : arch_dir,
+		ArchiveDir : archDir,
 		ReportActions : true,
 		Actions: []Action{
 			&RunAction{
@@ -93,19 +93,19 @@ func Test_RunFail(t *testing.T) {
 	}
 
 	Watch(&cfg)
-	temp_file, err := ioutil.TempFile("", "springboard")
+	tempFile, err := ioutil.TempFile("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	log.Println(temp_file.Name())
-	defer func() { os.Remove(temp_file.Name()) }()
-	temp_file.Write([]byte("kruncha6"))
-	temp_file.Close()
-	os.Rename(temp_file.Name(), temp_dir+string(os.PathSeparator)+"foo")
+	log.Println(tempFile.Name())
+	defer func() { os.Remove(tempFile.Name()) }()
+	tempFile.Write([]byte("kruncha6"))
+	tempFile.Close()
+	os.Rename(tempFile.Name(), tempDir+string(os.PathSeparator)+"foo")
 
 	<-wait
 
-	_, err = os.Open(temp_dir + string(os.PathSeparator) + "foo")
+	_, err = os.Open(tempDir + string(os.PathSeparator) + "foo")
 	if err != nil {
 		t.Error("Not able to open the file which should remain")
 	}
@@ -113,38 +113,38 @@ func Test_RunFail(t *testing.T) {
 
 func Test_RunArgs(t *testing.T) {
 
-	temp_dir, err := ioutil.TempDir("", "springboard")
+	tempDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(temp_dir) }()
+	defer func() { os.Remove(tempDir) }()
 
-	arch_dir, err := ioutil.TempDir("", "springboard")
+	archDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(arch_dir) }()
+	defer func() { os.Remove(archDir) }()
 
-	other_dir, err := ioutil.TempDir("", "springboard")
+	otherDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(other_dir) }()
+	defer func() { os.Remove(otherDir) }()
 
 
 	wait := make(chan bool)
 	cfg := Config{
-		dont_block: true,
-		Dir:        temp_dir,
+		dontBlock: true,
+		Dir:        tempDir,
 		Debug:      true,
 		// using an archive dir as this shows command OK nicely
-		ArchiveDir : arch_dir,
+		ArchiveDir : archDir,
 		ReportActions : true,
 		Actions: []Action{
 			&RunAction{
 				Cmd: "./test1.sh",
 				Args : []string{
-					other_dir,
+					otherDir,
 				},
 				
 			},
@@ -155,58 +155,58 @@ func Test_RunArgs(t *testing.T) {
 	}
 
 	Watch(&cfg)
-	temp_file, err := ioutil.TempFile("", "springboard")
+	tempFile, err := ioutil.TempFile("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	log.Println(temp_file.Name())
-	defer func() { os.Remove(temp_file.Name()) }()
-	temp_file.Write([]byte("kruncha6"))
-	temp_file.Close()
-	os.Rename(temp_file.Name(), temp_dir+string(os.PathSeparator)+"foo")
+	log.Println(tempFile.Name())
+	defer func() { os.Remove(tempFile.Name()) }()
+	tempFile.Write([]byte("kruncha6"))
+	tempFile.Close()
+	os.Rename(tempFile.Name(), tempDir+string(os.PathSeparator)+"foo")
 
 	<-wait
 
-	_, err = os.Open(other_dir + string(os.PathSeparator) + "foo")
+	_, err = os.Open(otherDir + string(os.PathSeparator) + "foo")
 	if err != nil {
-		t.Error("Not able to open the file which should now exist in " + other_dir)
+		t.Error("Not able to open the file which should now exist in " + otherDir)
 	}
 }
 
 func Test_RunPostArgs(t *testing.T) {
 
-	temp_dir, err := ioutil.TempDir("", "springboard")
+	tempDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(temp_dir) }()
+	defer func() { os.Remove(tempDir) }()
 
-	arch_dir, err := ioutil.TempDir("", "springboard")
+	archDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(arch_dir) }()
+	defer func() { os.Remove(archDir) }()
 
-	other_dir, err := ioutil.TempDir("", "springboard")
+	otherDir, err := ioutil.TempDir("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	defer func() { os.Remove(other_dir) }()
+	defer func() { os.Remove(otherDir) }()
 
 
 	wait := make(chan bool)
 	cfg := Config{
-		dont_block: true,
-		Dir:        temp_dir,
+		dontBlock: true,
+		Dir:        tempDir,
 		Debug:      true,
 		// using an archive dir as this shows command OK nicely
-		ArchiveDir : arch_dir,
+		ArchiveDir : archDir,
 		ReportActions : true,
 		Actions: []Action{
 			&RunAction{
 				Cmd: "/bin/cp",
 				PostArgs : []string{
-					other_dir,
+					otherDir,
 				},
 				
 			},
@@ -217,20 +217,20 @@ func Test_RunPostArgs(t *testing.T) {
 	}
 
 	Watch(&cfg)
-	temp_file, err := ioutil.TempFile("", "springboard")
+	tempFile, err := ioutil.TempFile("", "springboard")
 	if err != nil {
 		panic(err)
 	}
-	log.Println(temp_file.Name())
-	defer func() { os.Remove(temp_file.Name()) }()
-	temp_file.Write([]byte("kruncha6"))
-	temp_file.Close()
-	os.Rename(temp_file.Name(), temp_dir+string(os.PathSeparator)+"foo")
+	log.Println(tempFile.Name())
+	defer func() { os.Remove(tempFile.Name()) }()
+	tempFile.Write([]byte("kruncha6"))
+	tempFile.Close()
+	os.Rename(tempFile.Name(), tempDir+string(os.PathSeparator)+"foo")
 
 	<-wait
 
-	_, err = os.Open(other_dir + string(os.PathSeparator) + "foo")
+	_, err = os.Open(otherDir + string(os.PathSeparator) + "foo")
 	if err != nil {
-		t.Error("Not able to open the file which should now exist in " + other_dir)
+		t.Error("Not able to open the file which should now exist in " + otherDir)
 	}
 }
