@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	"github.com/draxil/springboard/watch"
+	"github.com/urfave/cli"
 	"os"
 )
 
@@ -23,8 +23,12 @@ func app() *cli.App {
 	commands, flags, _ := setup()
 	app.Commands = commands
 	app.Version = version
-	app.Authors = []cli.Author{cli.Author{Name: author,
-		Email: authorEmail}}
+	app.Authors = []cli.Author{
+		{
+			Name:  author,
+			Email: authorEmail,
+		},
+	}
 	app.Flags = flags
 	return app
 }
@@ -227,10 +231,9 @@ func run_command(cfg *watch.Config, action func(*watch.Config)) cli.Command {
 			// 	Usage: "Set extra http headers, format is KEY:VAL",
 			// },
 			cli.StringSliceFlag{
-				Name:        "postarg",
-				Usage:       "Add arguments which are run after the filename in the command we build. So if you were doing a cp: ./springboard run --postarg /some/place cp\nNote that you can use postarg repeatedly to add more arguments.",
+				Name:  "postarg",
+				Usage: "Add arguments which are run after the filename in the command we build. So if you were doing a cp: ./springboard run --postarg /some/place cp\nNote that you can use postarg repeatedly to add more arguments.",
 				Value: (*cli.StringSlice)(&ra.PostArgs),
-
 			},
 		},
 		Action: func(c *cli.Context) {
@@ -247,13 +250,13 @@ func run_command(cfg *watch.Config, action func(*watch.Config)) cli.Command {
 			}
 
 			ra.Cmd = args.First()
-			ra.Args = args[1:len(args)-1]
+			ra.Args = args[1 : len(args)-1]
 
 			cfg.Actions = []watch.Action{
 				&ra,
 			}
 			cfg.Dir = args[len(args)-1]
-			
+
 			action(cfg)
 		},
 	}
