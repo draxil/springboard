@@ -63,6 +63,7 @@ Please feel free to contact at me if I'm missing something you need.
 
 # Versions
 
+* v0.3.2 - Version to cause github builds to start
 * v0.3.1 - Cleanup filepath on "existing files" behaviour to remove double slashes
 * v0.3.0 - run action, fix to archive behaviour, fixed disappearing flock library
 * v0.2.1 - go 1.6 compile fixes
