@@ -31,7 +31,7 @@ And similarly for the options pertaining to the subcommands and actions:
 You will want to make sure that your $GOPATH/bin is in your $PATH or else move the executable from $GOPATH/bin/springboard somewhere in your $PATH.
 
 ## Github release builds
-See [[https://github.com/draxil/springboard/releases][the github release page]]
+See [the github release page](https://github.com/draxil/springboard/releases)
 
 # Actions
  
