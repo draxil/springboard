@@ -1,4 +1,4 @@
-# springboard
+# Springboard
 Watch a directory (drop folder) for new files and "bounce" them on somewhere else, via several means such as HTTP post or another command.
 
 # usage
@@ -17,8 +17,12 @@ And similarly for the options pertaining to the subcommands and actions:
  
 > springboard post -h
 
-# installing
+# Installing
 
+## With go 
+> go install github.com/draxil/springboard@latest
+
+## With an older go
 1. Get go (version 1.7+)
 2. Make sure you have set $GOPATH to a sensible place you can write to. 
 3. Issue:
@@ -26,7 +30,10 @@ And similarly for the options pertaining to the subcommands and actions:
 
 You will want to make sure that your $GOPATH/bin is in your $PATH or else move the executable from $GOPATH/bin/springboard somewhere in your $PATH.
 
-# actions
+## Github release builds
+See [[https://github.com/draxil/springboard/releases][the github release page]]
+
+# Actions
  
  So far the available actions are:
  
@@ -44,7 +51,7 @@ The code effective funtionality could be useful to a go coder independent of the
 
 springboard ignores directories, so it's completely safe to have subdirectories which you can use for your archives etc.
 
-# status / plans
+# Status / plans
  
  This is at an early stage of development and is subject to change! Upcoming additions:
  
@@ -54,7 +61,7 @@ springboard ignores directories, so it's completely safe to have subdirectories 
 
 Please feel free to contact at me if I'm missing something you need.
 
-# versions
+# Versions
 
 * v0.3.1 - Cleanup filepath on "existing files" behaviour to remove double slashes
 * v0.3.0 - run action, fix to archive behaviour, fixed disappearing flock library
@@ -63,7 +70,7 @@ Please feel free to contact at me if I'm missing something you need.
 * v0.1.0 - First useful version
 
 
-# credit
+# Credit
 
 Much of the development time for this tool comes from printevolved, if you need print or print technology:
 
