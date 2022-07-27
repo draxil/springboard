@@ -1,7 +1,7 @@
 # Springboard
 Watch a directory (drop folder) for new files and "bounce" them on somewhere else, via several means such as HTTP post or another command.
 
-# usage
+# Usage
 
 Example:
 
